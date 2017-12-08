@@ -1,0 +1,25 @@
+﻿@using AGL.AGLPets.Utilities
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="jumbotron">
+    @using (Html.BeginForm("GetPetList", "Home", new { petType = "petType" }))
+    {
+        <div>
+            <p>
+                @Html.DropDownList("PetTypeList")
+            </p>
+            <p>
+                <input type="submit" value="Get Pet List" name="GetPetList">
+
+            </p>
+        </div>
+    }
+
+    <div class="main-content">
+            @Html.Partial("_PetsListPartial")
+    </div>
+
+</div>

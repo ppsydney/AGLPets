@@ -1,0 +1,29 @@
+﻿@model List<AGL.ALGPets.Portals.PetsMVCPortal.Models.OwnersPetsViewModel>
+
+<table class="table">
+    @if (Model?.SelectMany(p => p.Pets) != null && Model?.SelectMany(p => p.Pets).Count() != 0)
+    {
+        foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <h2>@item.Gender</h2>
+                </td>
+            </tr>
+            foreach (var petItem in item.Pets)
+            {
+                <tr>
+                    <td>
+                        @petItem.ToString()
+                    </td>
+                </tr>
+            }
+        }
+    }
+    else
+    {
+        <tr>
+            <td><i>No results to display or no initial search</i></td>
+        </tr>
+    }
+</table>
