@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AGL.AGLPets.Utilities
 {
-    public static class SortHelper
+    public static class SortingHelper
     {
         /// <summary>
         /// Sorts the list alphabetically

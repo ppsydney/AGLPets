@@ -12,7 +12,7 @@ namespace AGL.ALGPets.Managers.PetsManager.Controllers
     public class PetsManagerController : ApiController, IPetsManagerInterface
     {
         #region Properties
-        private static HttpClient _client;
+        dynamic _client;
         #endregion
 
         #region ctor
@@ -22,7 +22,7 @@ namespace AGL.ALGPets.Managers.PetsManager.Controllers
         /// <param name="client"></param>
         public PetsManagerController(IAGLPetsApiHttpClient client)
         {
-            _client = client.Client;
+            _client = client;
         }
         #endregion
 
@@ -52,29 +52,12 @@ namespace AGL.ALGPets.Managers.PetsManager.Controllers
         /// <returns>List<OwnersPetsFlattenedDTO></returns>
         public async Task<List<OwnersPetsFlattenedDTO>> GetAGLPetsFlatten(string petType)
         {
-            var ownersList = await GetAllAGLPets();
+            var ownersList = await _client.GetAllAGLPets();
 
             ownersList = DTOHelpers.FilterResults(ownersList, petType);
             var ownersFlattenList = DTOHelpers.FlattenResult(ownersList);
 
             return ownersFlattenList;
-        }
-
-        /// <summary>
-        /// Accesses the AGLPets webservice to get a list of OwnerDTOs
-        /// Note: This could be stored in a Session variable to save network traffic, but the specs are not clear
-        /// </summary>
-        /// <param name=""></param>
-        /// <returns>List<OwnerDTO></returns>
-        public async Task<List<OwnerDTO>> GetAllAGLPets()
-        {
-            // TODO: Consider caching the response to save network traffic; clarify with BAs about the FS
-            HttpResponseMessage response = await _client.GetAsync(_client.BaseAddress);
-            response.EnsureSuccessStatusCode();
-            string responseBody = await response.Content.ReadAsStringAsync();
-            var ownersList = JsonConvert.DeserializeObject<List<OwnerDTO>>(responseBody);
-
-            return ownersList;
         }
         #endregion
     }

@@ -7,7 +7,7 @@ using AGL.ALGPets.Portals.PetsMVCPortal.Controllers;
 using AGL.ALGPets.DataTransferObjects;
 using AGL.AGLPets.Utilities;
 using AGL.ALGPets.Portals.PetsMVCPortal.Helpers;
-
+using System.Configuration;
 
 namespace AGL.AGLPets.UnitTests.MVCPortalTests
 {
@@ -15,9 +15,9 @@ namespace AGL.AGLPets.UnitTests.MVCPortalTests
     public class MVCTests
     {
         #region Properties
-        private TestContext testContextInstance;
+        private TestContext _testContextInstance;
 
-        private readonly string _WebAPIURI = "http://localhost:54861/api/PetsManager/";
+        private readonly string _WebAPIURI = ConfigurationManager.AppSettings["WebApiHttpClientURI"] + ConfigurationManager.AppSettings["WebApiHttpClientPetController"];
         private List<OwnerDTO> _owners;
         private List<OwnersPetsFlattenedDTO> _ownersPetFlattenedFiltered;
         private List<OwnersPetsFlattenedDTO> _ownersPetFlattenedAndSorted;
@@ -32,11 +32,11 @@ namespace AGL.AGLPets.UnitTests.MVCPortalTests
         {
             get
             {
-                return testContextInstance;
+                return _testContextInstance;
             }
             set
             {
-                testContextInstance = value;
+                _testContextInstance = value;
             }
         }
 
@@ -89,38 +89,17 @@ namespace AGL.AGLPets.UnitTests.MVCPortalTests
 
         #region Tests
         /// <summary>
-        /// Asserts the URI for the WebAPI proxy is not null and contains the pet type
-        /// </summary>
-        [TestMethod]
-        public void MVCPortal_Should_Return_WebApiURINotNullAndContainsPetType()
-        {
-            // Arrange
-            IWebApiHttpClient iWebAPI = new WebApiHttpClient(_WebAPIURI);
-            HomeController hc = new HomeController(iWebAPI);
-
-            // Act
-            string actual = hc.GenerateURI(AGLPetsEnums.PetTypeEnum.Cat);
-
-            // Assert
-            Assert.IsNotNull(actual);
-            Assert.IsTrue(actual.Contains(AGLPetsEnums.PetTypeEnum.Cat.ToString()));
-        }
-
-        /// <summary>
         /// Asserts that the WebAPI is up and running and accessible from MVCPortal
         /// </summary>
         [TestMethod]
         public async Task MVCPortal_Should_Return_WebApiAccessible()
         {
             // Arrange
-            IWebApiHttpClient iWebAPI = new WebApiHttpClient(_WebAPIURI);
-            iWebAPI.Client.BaseAddress = new Uri(_WebAPIURI);
-            HomeController hc = new HomeController(iWebAPI);
-
+            WebApiHttpClient webAPI = new WebApiHttpClient(_WebAPIURI);
             AGLPetsEnums.PetTypeEnum petType = AGLPetsEnums.PetTypeEnum.Cat;
 
             // Act
-            List<OwnersPetsFlattenedDTO> actual = await hc.GetAGLPetsByType(petType);
+            List<OwnersPetsFlattenedDTO> actual = await webAPI.GetAGLOwnersPetsFlattenedByType(petType);
 
             // Assert
             Assert.IsNotNull(actual);

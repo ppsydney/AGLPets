@@ -10,6 +10,7 @@ using AGL.ALGPets.DataTransferObjects;
 using AGL.ALGPets.Managers.PetsManager.Controllers;
 using AGL.ALGPets.Managers.PetsManager.Helpers;
 using AGL.AGLPets.Utilities;
+using System.Configuration;
 
 namespace AGL.AGLPets.UnitTests.PetsManagerTest
 {
@@ -17,9 +18,9 @@ namespace AGL.AGLPets.UnitTests.PetsManagerTest
     public class PetsManagerTests
     {
         #region Properties
-        private TestContext testContextInstance;
+        private TestContext _testContextInstance;
 
-        private readonly string _AGLPetsURI = "http://agl-developer-test.azurewebsites.net/people.json";
+        private readonly string _AGLPetsURI = ConfigurationManager.AppSettings["AGLPetsApiHttpClientURI"];
         private string _ownersJSON;
         private List<OwnerDTO> _owners;
         private List<OwnersPetsFlattenedDTO> _ownersPetFlattened;
@@ -35,11 +36,11 @@ namespace AGL.AGLPets.UnitTests.PetsManagerTest
         {
             get
             {
-                return testContextInstance;
+                return _testContextInstance;
             }
             set
             {
-                testContextInstance = value;
+                _testContextInstance = value;
             }
         }
 
@@ -100,11 +101,10 @@ namespace AGL.AGLPets.UnitTests.PetsManagerTest
         public async Task GetAGLPets_Should_Return_NotNull()
         {
             // Arrange
-            IAGLPetsApiHttpClient iPm = new AGLPetsApiHttpClient(_AGLPetsURI);
-            PetsManagerController pm = new PetsManagerController(iPm);
+            IAGLPetsApiHttpClient aglPetsApiHttpClient = new AGLPetsApiHttpClient(_AGLPetsURI);
 
             // Act
-            List<OwnerDTO> result = await pm.GetAllAGLPets();
+            List<OwnerDTO> result = await aglPetsApiHttpClient.GetAllAGLPets();
 
             // Assert
             Assert.IsNotNull(result);
@@ -119,17 +119,14 @@ namespace AGL.AGLPets.UnitTests.PetsManagerTest
         {
             // Arrange
             // Mock the HttpClient
-            HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
-            httpResponseMessage.Content = new StringContent(_ownersJSON);
-            FooHandler handler = new FooHandler(httpResponseMessage);
-            IAGLPetsApiHttpClient iPm = new AGLPetsApiHttpClient(handler);
-            iPm.Client.BaseAddress = new Uri(_AGLPetsURI);
-            PetsManagerController pm = new PetsManagerController(iPm);
+            FooAGLPetsApiHttpMessageHandler handler = new FooAGLPetsApiHttpMessageHandler(GenerateHttpResponseMessage(_AGLPetsURI, _ownersJSON));
+            IAGLPetsApiHttpClient aglPetsApiHttpClient = new AGLPetsApiHttpClient(handler);
+            aglPetsApiHttpClient.Client.BaseAddress = new Uri(_AGLPetsURI);
 
             List<OwnerDTO> expected = _owners;
 
             // Act
-            List<OwnerDTO> actual = await pm.GetAllAGLPets();
+            List<OwnerDTO> actual = await aglPetsApiHttpClient.GetAllAGLPets();
 
             // Assert
             CollectionAssert.AreEqual(expected, actual, new OwnerDTOComparer());
@@ -145,19 +142,16 @@ namespace AGL.AGLPets.UnitTests.PetsManagerTest
         {
             // Arrange
             // Mock the HttpClient
-            HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
-            httpResponseMessage.Content = new StringContent(_ownersJSON);
-            FooHandler handler = new FooHandler(httpResponseMessage);
-            IAGLPetsApiHttpClient iPm = new AGLPetsApiHttpClient(handler);
-            iPm.Client.BaseAddress = new Uri(_AGLPetsURI);
-            PetsManagerController pm = new PetsManagerController(iPm);
-
-            List<OwnersPetsFlattenedDTO> expected = _ownersPetFlattenedAndFiltered;
+            FooAGLPetsApiHttpMessageHandler handler = new FooAGLPetsApiHttpMessageHandler(GenerateHttpResponseMessage(_AGLPetsURI, _ownersJSON));
+            IAGLPetsApiHttpClient aglPetsApiHttpClient = new AGLPetsApiHttpClient(handler);
+            aglPetsApiHttpClient.Client.BaseAddress = new Uri(_AGLPetsURI);
+            PetsManagerController petsManagerController = new PetsManagerController(aglPetsApiHttpClient);
 
             AGLPetsEnums.PetTypeEnum petType = AGLPetsEnums.PetTypeEnum.Cat;
+            List<OwnersPetsFlattenedDTO> expected = _ownersPetFlattenedAndFiltered;
 
             // Act
-            List<OwnersPetsFlattenedDTO> actual = await pm.GetAGLPetsFlatten(petType.ToString());
+            List<OwnersPetsFlattenedDTO> actual = await petsManagerController.GetAGLPetsFlatten(petType.ToString());
 
             // Assert
             CollectionAssert.AreEqual(expected, actual, new OwnersPetsFlattenedDTOComparer());
@@ -204,6 +198,15 @@ namespace AGL.AGLPets.UnitTests.PetsManagerTest
 
             // Assert
             CollectionAssert.AreEqual(expected, actual, new OwnersPetsFlattenedDTOComparer());
+        }
+        #endregion
+
+        #region Helpers
+        private HttpResponseMessage GenerateHttpResponseMessage(string uri, string content)
+        {
+            HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
+            httpResponseMessage.Content = new StringContent(content);
+            return httpResponseMessage;
         }
         #endregion
     }

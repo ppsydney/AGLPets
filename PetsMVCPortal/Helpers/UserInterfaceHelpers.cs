@@ -6,6 +6,10 @@ namespace AGL.ALGPets.Portals.PetsMVCPortal.Helpers
 {
     public static class UserInterfaceHelpers
     {
+        /// <summary>
+        /// Generates a list of pet types for the UI dropdownlist
+        /// </summary>
+        /// <returns></returns>
         public static List<SelectListItem> GetListOfPetTypes()
         {
             List<SelectListItem> items = new List<SelectListItem>();

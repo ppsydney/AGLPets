@@ -13,7 +13,7 @@ namespace AGL.AGLPets.UnitTests.MVCPortalTests
     public class HelpersTests
     {
         #region Properties
-        private TestContext testContextInstance;
+        private TestContext _testContextInstance;
         private List<OwnersPetsFlattenedDTO> _ownersPetFlattened;
         private List<OwnersPetsFlattenedDTO> _ownersPetFlattenedSorted;
         #endregion
@@ -27,11 +27,11 @@ namespace AGL.AGLPets.UnitTests.MVCPortalTests
         {
             get
             {
-                return testContextInstance;
+                return _testContextInstance;
             }
             set
             {
-                testContextInstance = value;
+                _testContextInstance = value;
             }
         }
         
@@ -79,7 +79,7 @@ namespace AGL.AGLPets.UnitTests.MVCPortalTests
             // Arrange
 
             // Act
-            List<OwnersPetsFlattenedDTO> actual = SortHelper.GetListSorted(_ownersPetFlattened);
+            List<OwnersPetsFlattenedDTO> actual = SortingHelper.GetListSorted(_ownersPetFlattened);
 
             // Assert
             Assert.IsNotNull(actual);
@@ -95,7 +95,7 @@ namespace AGL.AGLPets.UnitTests.MVCPortalTests
             // Arrange
 
             // Act
-            List<OwnersPetsFlattenedDTO> actual = SortHelper.GetListSorted(_ownersPetFlattened);
+            List<OwnersPetsFlattenedDTO> actual = SortingHelper.GetListSorted(_ownersPetFlattened);
 
             // Assert
             CollectionAssert.AreEqual(_ownersPetFlattenedSorted, actual, new OwnersPetsFlattenedDTOComparer());
